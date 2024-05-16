@@ -7,7 +7,7 @@ import XCTest
 import HoshiJsonMacroMacros
 
 let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
+    "HoshiJson": HoshiJsonMacro.self,
 ]
 #endif
 
@@ -16,10 +16,14 @@ final class HoshiJsonMacroTests: XCTestCase {
         #if canImport(HoshiJsonMacroMacros)
         assertMacroExpansion(
             """
-            #stringify(a + b)
+            @HoshiJson
+            class Test {
+                var traceID: String = ""
+                var test2: Int?
+            }
             """,
             expandedSource: """
-            (a + b, "a + b")
+            
             """,
             macros: testMacros
         )
