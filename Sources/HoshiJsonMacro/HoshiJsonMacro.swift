@@ -34,3 +34,5 @@ public macro HoshiJson() = #externalMacro(module: "HoshiJsonMacroMacros", type: 
 @attached(peer)
 public macro HSNoEqual() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HSNoEqualMacro")
 
+@attached(peer)
+public macro HSJson(_: String) = #externalMacro(module: "HoshiJsonMacroMacros", type: "HSJsonMacro")

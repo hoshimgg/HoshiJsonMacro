@@ -37,13 +37,10 @@ class ClassTestA {
 
 @HoshiJson
 class ClassTestB {
-    var customIntA = 2
-    var customInt_b = 3
-    
-    enum CodingKeys: String, CodingKey {
-        case customIntA = "int_a"
-        case customInt_b = "intB"
-    }
+    @HSJson("int_a") var customIntA = 0
+    @HSJson("intB") var customInt_b = 1
+    @HSNoEqual var intC = 2
+    var intD = 3
 }
 
 @HoshiJson

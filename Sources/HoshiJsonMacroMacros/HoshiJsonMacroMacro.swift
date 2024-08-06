@@ -9,6 +9,7 @@ struct DecodableMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         HoshiJsonMacro.self,
         HSNoEqualMacro.self,
+        HSJsonMacro.self,
     ]
 }
 
@@ -16,6 +17,7 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
     struct HSVariable {
         let name: String
         let noEqual: Bool
+        let json: String
     }
     
     public static func expansion<Declaration, Context> (
@@ -38,7 +40,13 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             let noEqual = varDeclSyn.attributes.contains {
                 $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "HSNoEqual"
             }
-            return HSVariable(name: name, noEqual: noEqual)
+            let json = varDeclSyn.attributes.first {
+                $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "HSJson"
+            }?.as(AttributeSyntax.self)?.arguments?.as(LabeledExprListSyntax.self)?.first?.as(LabeledExprSyntax.self)?.expression
+                .as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text
+            ?? name.toSnake
+
+            return HSVariable(name: name, noEqual: noEqual, json: json)
         }
         
         let enums = declaration.memberBlock.members.compactMap { member in
@@ -70,7 +78,7 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         }()
         
         let codingKeysCode = variables.map { """
-            case \($0.name) = "\($0.name.toSnake)"
+            case \($0.name) = "\($0.json)"
         """ }.joined(separator: "\n")
         
         let codingKeysStr = hasCodingKeys ? "" : """
@@ -180,6 +188,16 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
 }
 
 public struct HSNoEqualMacro: PeerMacro {
+    public static func expansion(
+        of node: SwiftSyntax.AttributeSyntax,
+        providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
+        in context: some SwiftSyntaxMacros.MacroExpansionContext
+    ) throws -> [SwiftSyntax.DeclSyntax] {
+        return []
+    }
+}
+
+public struct HSJsonMacro: PeerMacro {
     public static func expansion(
         of node: SwiftSyntax.AttributeSyntax,
         providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,

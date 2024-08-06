@@ -9,6 +9,7 @@ import HoshiJsonMacroMacros
 let testMacros: [String: Macro.Type] = [
     "HoshiJson": HoshiJsonMacro.self,
     "HSNoEqual": HSNoEqualMacro.self,
+    "HSJson": HSJsonMacro.self,
 ]
 #endif
 
@@ -19,7 +20,7 @@ final class HoshiJsonMacroTests: XCTestCase {
             """
             @HoshiJson
             class Test {
-                @HSNoEqual var traceID: String = ""
+                @HSNoEqual @HSJson("int_a") var traceID: String = ""
                 var test2: Int?
             }
             """,
