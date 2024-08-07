@@ -15,18 +15,22 @@ public protocol HoshiDecodable: Decodable {
 /// - Note: 若要自定义反序列化过程，可以重写 init(from decoder: Decoder) 方法
 /// - Note: 不含计算变量
 @attached(member, names:
-    named(CodingKeys),
+    named(hsOrigDict),
+    named(hsOrigJsonStr),
     named(init(from:)),
     named(init(jsonStr:)),
     named(init(dict:)),
     named(init(data:)),
     named(init(coder:)),
     named(init()),
+    named(CodingKeys),
     named(==),
     named(isEqual),
-    named(description)
+    named(description),
+    named(jsonString),
+    named(toDict)
 )
-@attached(extension, conformances: HoshiDecodable, CustomStringConvertible, Equatable)
+@attached(extension, conformances: HoshiDecodable, CustomStringConvertible, Equatable, Encodable)
 public macro HoshiJson() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HoshiJsonMacro")
 
 /// 标记某变量不参与 equal 对比

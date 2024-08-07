@@ -18,7 +18,7 @@ public class MDEntity {
 struct StructTest {
     @HSNoEqual var intA = 0
     var int_b = 1
-    var intID: Int?
+    var intID: Int? = 4
 }
 
 @HoshiJson
@@ -40,7 +40,7 @@ class ClassTestB {
     @HSJson("int_a") var customIntA = 0
     @HSJson("intB") var customInt_b = 1
     @HSNoEqual var intC = 2
-    var intD = 3
+    var intD: Int? = 0
 }
 
 @HoshiJson

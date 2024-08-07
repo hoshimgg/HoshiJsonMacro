@@ -127,6 +127,9 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         """ : ""
 
         return [ """
+            var hsOrigDict: [String:Any]?
+            var hsOrigJsonStr: String?
+        
             \(raw: codingKeysStr)
             
             \(raw: initFromDcdStr)
@@ -134,11 +137,13 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             public \(raw: requiredStr)\(raw: cvnsStr)init(jsonStr: String) {
                 guard let data = jsonStr.data(using: .utf8) else { self.init(); return }
                 self.init(data: data)
+                hsOrigJsonStr = jsonStr
             }
             
             public \(raw: requiredStr)\(raw: cvnsStr)init(dict: [String:Any]) {
                 guard let data = try? JSONSerialization.data(withJSONObject: dict, options: []) else { self.init(); return }
                 self.init(data: data)
+                hsOrigDict = dict
             }
             
             public init(data: Data) {
@@ -161,6 +166,18 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             \(raw: ocEqualStr)
         
             \(raw: descStr)
+        
+            var jsonString: String {
+                if let jsonStr = hsOrigJsonStr { return jsonStr }
+                guard let data = try? JSONEncoder().encode(self) else { return "序列化错误" }
+                return String(data: data, encoding: .utf8) ?? "序列化错误"
+            }
+            
+            var toDict: [String:Any] {
+                if let dict = hsOrigDict { return dict }
+                guard let data = try? JSONEncoder().encode(self) else { return ["error": "序列化错误"] }
+                return (try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]) ?? ["error": "序列化错误"]
+            }
         """ ]
     }
     
@@ -177,10 +194,11 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             fatalError("若继承，只允许MDEntity")
         }
         let decodableExtension = try ExtensionDeclSyntax("extension \(type.trimmed): HoshiDecodable {}")
+        let encodeExtension = try ExtensionDeclSyntax("extension \(type.trimmed): Encodable {}")
         let descExtension = try ExtensionDeclSyntax("extension \(type.trimmed): CustomStringConvertible {}")
         let equalExtension = try ExtensionDeclSyntax("extension \(type.trimmed): Equatable {}")
         
-        var exs = [decodableExtension]
+        var exs = [decodableExtension, encodeExtension]
         if isClass && fatherName == nil { exs.append(descExtension) }
         if fatherName == nil { exs.append(equalExtension) }
         return exs
