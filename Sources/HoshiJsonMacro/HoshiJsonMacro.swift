@@ -8,11 +8,11 @@ public protocol HoshiDecodable: Decodable {
     init(dict: [String:Any])
 }
 
-/// - Warning: 变量命名规则:（以下任选其一，不可混用）\
-/// (1) 完全和json字段相同，保留下划线；\
-/// (2) 严格按照json字段驼峰命名；（如`rtc_channel_id`命名为`rtcChannelId`，注意最后一个`d`为小写）\
-/// (3) 自定义enum CodingKeys: String, CodingKey
+/// - Note: 变量命名规则:\
+/// (1) 按照json字段，使用驼峰或下划线命名（如json字段`rtc_channel_id`可以命名为`rtcChannelId`、`rtcChannelID`、`rtc_channel_id`\
+/// (2) 使用 `@HSJson("name")` 自定义json字段名
 /// - Warning: 除MDEntity外，禁止继承
+/// - Note: 若要自定义反序列化过程，可以重写 init(from decoder: Decoder) 方法
 /// - Note: 不含计算变量
 @attached(member, names:
     named(CodingKeys),
@@ -29,10 +29,11 @@ public protocol HoshiDecodable: Decodable {
 @attached(extension, conformances: HoshiDecodable, CustomStringConvertible, Equatable)
 public macro HoshiJson() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HoshiJsonMacro")
 
-/// 标记某变量不参与equal比对
-/// - Note: 不含计算变量
+/// 标记某变量不参与 equal 对比
+/// - Note: equal 对比中不含计算变量
 @attached(peer)
 public macro HSNoEqual() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HSNoEqualMacro")
 
+/// 用于自定义 json 字段名
 @attached(peer)
 public macro HSJson(_: String) = #externalMacro(module: "HoshiJsonMacroMacros", type: "HSJsonMacro")
