@@ -19,6 +19,7 @@ struct StructTest {
     @HSNoEqual var intA = 0
     var int_b = 1
     var intID: Int? = 4
+//    var bizExtraData: [String:Codable] = [:]
 }
 
 @HoshiJson
