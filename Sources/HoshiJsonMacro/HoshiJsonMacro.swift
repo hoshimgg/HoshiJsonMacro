@@ -12,8 +12,7 @@ public protocol HoshiDecodable: Decodable {
 /// (1) 按照json字段，使用驼峰或下划线命名（如json字段`rtc_channel_id`可以命名为`rtcChannelId`、`rtcChannelID`、`rtc_channel_id`\
 /// (2) 使用 `@HSJson("name")` 自定义json字段名
 /// - Warning: 除MDEntity外，禁止继承
-/// - Note: 若要自定义反序列化过程，可以重写 init(from decoder: Decoder) 方法
-/// - Note: 不含计算变量
+/// - Note: 若解析失败，请首先考虑类型声明错误
 @attached(member, names:
     named(hsOrigDict),
     named(hsOrigJsonStr),

@@ -35,20 +35,20 @@ func testDataChannel() {
     let center = Center()
     let biz = Biz(center)
     
-//    center.onDataChannel(cmd: "Struct", dict: [
-//        "int_a": 11,
-//        "int_b": 12,
-//        "int_id": 13,
-//    ])
-//    
-//    center.onDataChannel(cmd: "ClassA", jsonStr: """
-//    {
-//        "struct_b": {
-//            "int_b": 22,
-//            "int_id": 23,
-//        }
-//    }
-//    """)
+    center.onDataChannel(cmd: "Struct", dict: [
+        "int_a": 11,
+        "int_b": 12,
+        "int_id": 13,
+    ])
+    
+    center.onDataChannel(cmd: "ClassA", jsonStr: """
+    {
+        "struct_b": {
+            "int_b": 22,
+            "int_id": 23,
+        }
+    }
+    """)
     
     center.onDataChannel(cmd: "ClassB", dict: [
         "int_a": 31,
@@ -57,6 +57,6 @@ func testDataChannel() {
         "int_d": 34,
     ])
     
-//    center.onDataChannel(cmd: "ClassC", dict: [:])
+    center.onDataChannel(cmd: "ClassC", dict: [:])
 }
 

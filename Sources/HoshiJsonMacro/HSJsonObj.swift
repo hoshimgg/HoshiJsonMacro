@@ -9,6 +9,16 @@ import Foundation
 
 public struct HSJsonObj {
     private var value: Any?
+    
+    public init(_ value: Any?) {
+        if let value = value as? [Any] {
+            self.value = value.map { HSJsonObj($0) }
+        } else if let value = value as? [String:Any] {
+            self.value = value.mapValues { HSJsonObj($0) }
+        } else {
+            self.value = value
+        }
+    }
 }
 
 extension HSJsonObj: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral, ExpressibleByStringLiteral, ExpressibleByBooleanLiteral {
@@ -31,11 +41,14 @@ extension HSJsonObj: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral, Exp
 
 extension HSJsonObj: ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral, ExpressibleByNilLiteral {
     public init(arrayLiteral elements: Any...) {
-        self.value = elements
+        self.value = elements.map { HSJsonObj($0) }
     }
     
     public init(dictionaryLiteral elements: (String, Any)...) {
-        self.value = Dictionary(uniqueKeysWithValues: elements)
+        self.value = elements.reduce(into: [:]) { result, element in
+            let (key, value) = element
+            result[key] = HSJsonObj(value)
+        }
     }
     
     public init(nilLiteral: ()) { }
