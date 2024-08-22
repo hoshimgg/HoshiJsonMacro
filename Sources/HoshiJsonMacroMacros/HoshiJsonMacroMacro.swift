@@ -57,7 +57,7 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             member.decl.as(InitializerDeclSyntax.self)?.signature.parameterClause.parameters.first
         }
 
-        let hasFather = declaration.inheritanceClause != nil  // 父类只可能是MDEntity
+        let hasFather = declaration.inheritanceClause != nil  // 父类只可能是MDEntity或NSObject
         let hasCodingKeys = enums.contains("CodingKeys")
         let hasInitFromDcd = inits.contains { $0.firstName.text == "from" && $0.secondName?.text == "decoder" }
         
@@ -190,8 +190,9 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
     ) throws -> [ExtensionDeclSyntax] {
         let isClass = declaration is ClassDeclSyntax
         let fatherName = declaration.inheritanceClause?.inheritedTypes.first?.type.as(IdentifierTypeSyntax.self)?.name.text
-        if let fatherName = fatherName, fatherName != "MDEntity" {
-            fatalError("若继承，只允许MDEntity")
+        let allowedFathers = ["MDEntity", "NSObject"]
+        if let fatherName = fatherName, !allowedFathers.contains(fatherName) {
+            fatalError("若继承，只允许MDEntity或NSObject")
         }
         let decodableExtension = try ExtensionDeclSyntax("extension \(type.trimmed): HoshiDecodable {}")
         let encodeExtension = try ExtensionDeclSyntax("extension \(type.trimmed): Encodable {}")

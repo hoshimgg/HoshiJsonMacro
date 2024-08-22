@@ -11,7 +11,7 @@ public protocol HoshiDecodable: Decodable {
 /// - Note: 变量命名规则:\
 /// (1) 按照json字段，使用驼峰或下划线命名（如json字段`rtc_channel_id`可以命名为`rtcChannelId`、`rtcChannelID`、`rtc_channel_id`\
 /// (2) 使用 `@HSJson("name")` 自定义json字段名
-/// - Warning: 除MDEntity外，禁止继承
+/// - Warning: 除MDEntity或NSObject外，禁止继承
 /// - Note: 若解析失败，请首先考虑类型声明错误
 @attached(member, names:
     named(hsOrigDict),

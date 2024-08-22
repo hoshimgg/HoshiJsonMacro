@@ -37,7 +37,7 @@ class ClassTestA {
 }
 
 @HoshiJson
-class ClassTestB {
+@objcMembers class ClassTestB: NSObject {
     @HSJson("int_a") var customIntA = 0
     @HSJson("intB") var customInt_b = 1
     @HSNoEqual var intC = 2

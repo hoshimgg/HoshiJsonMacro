@@ -117,3 +117,14 @@ extension HSJsonObj: Codable {
         }
     }
 }
+
+extension HSJsonObj: HoshiDecodable {
+    public init(jsonStr: String) {
+        guard let data = jsonStr.data(using: .utf8) else { return }
+        self.value = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String:Any]
+    }
+    
+    public init(dict: [String:Any]) {
+        self.value = dict
+    }
+}
