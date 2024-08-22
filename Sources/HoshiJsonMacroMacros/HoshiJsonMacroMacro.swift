@@ -10,6 +10,7 @@ struct DecodableMacroPlugin: CompilerPlugin {
         HoshiJsonMacro.self,
         HSNoEqualMacro.self,
         HSJsonMacro.self,
+        HSNoJsonMacro.self,
     ]
 }
 
@@ -36,6 +37,10 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         let variables: [HSVariable] = declaration.memberBlock.members.compactMap { member in
             guard let varDeclSyn = member.decl.as(VariableDeclSyntax.self) else { return nil }
             if varDeclSyn.bindings.first?.accessorBlock != nil { return nil }  // 计算属性
+            let noJson = varDeclSyn.attributes.contains {
+                $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "HSNoJson"
+            }
+            if noJson { return nil }
             guard let name = varDeclSyn.bindings.first?.pattern.as(IdentifierPatternSyntax.self)?.identifier.text else { return nil }
             let noEqual = varDeclSyn.attributes.contains {
                 $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "HSNoEqual"
@@ -167,13 +172,13 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         
             \(raw: descStr)
         
-            var jsonString: String {
+            public var jsonString: String {
                 if let jsonStr = hsOrigJsonStr { return jsonStr }
                 guard let data = try? JSONEncoder().encode(self) else { return "序列化错误" }
                 return String(data: data, encoding: .utf8) ?? "序列化错误"
             }
             
-            var toDict: [String:Any] {
+            public var toDict: [String:Any] {
                 if let dict = hsOrigDict { return dict }
                 guard let data = try? JSONEncoder().encode(self) else { return ["error": "序列化错误"] }
                 return (try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]) ?? ["error": "序列化错误"]
@@ -207,6 +212,16 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
 }
 
 public struct HSNoEqualMacro: PeerMacro {
+    public static func expansion(
+        of node: SwiftSyntax.AttributeSyntax,
+        providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
+        in context: some SwiftSyntaxMacros.MacroExpansionContext
+    ) throws -> [SwiftSyntax.DeclSyntax] {
+        return []
+    }
+}
+
+public struct HSNoJsonMacro: PeerMacro {
     public static func expansion(
         of node: SwiftSyntax.AttributeSyntax,
         providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,

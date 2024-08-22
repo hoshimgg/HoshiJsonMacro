@@ -40,3 +40,7 @@ public macro HSNoEqual() = #externalMacro(module: "HoshiJsonMacroMacros", type: 
 /// 用于自定义 json 字段名
 @attached(peer)
 public macro HSJson(_: String) = #externalMacro(module: "HoshiJsonMacroMacros", type: "HSJsonMacro")
+
+/// 标记某变量不参与序列化/反序列化
+@attached(peer)
+public macro HSNoJson() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HSNoJsonMacro")
