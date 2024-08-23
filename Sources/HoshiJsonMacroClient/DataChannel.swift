@@ -9,7 +9,7 @@ import Foundation
 
 class Biz {
     init(_ center: Center) {
-        center.observerDC(cmd: "Struct", cn: "Struct", lifeFlag: self, class: StructTest.self) { obj in
+        center.observerDC(cmd: "Struct", cn: "Struct", lifeFlag: self, class: StructTestA.self) { obj in
             print(obj)
             // StructTest(intA: 11, int_b: 12, intID: Optional(13))
         }

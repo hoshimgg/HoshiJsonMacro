@@ -26,8 +26,8 @@ struct StructTestA {
 class ClassTestA {
     var strA = "defaultStrA"
     var str_b: String?
-    var structA = StructTest()
-    var struct_b: StructTest?
+    var structA = StructTestA()
+    var struct_b: StructTestA?
     var intB: Int = 0
     
     enum CodingKeys: String, CodingKey {

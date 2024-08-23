@@ -146,7 +146,13 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             }
             
             public \(raw: requiredStr)\(raw: cvnsStr)init(dict: [String:Any]) {
-                guard let data = try? JSONSerialization.data(withJSONObject: dict, options: []) else { self.init(); return }
+                var data: Data? = nil
+                if let dict = dict as? [String:HSJsonObj] {
+                    data = try? JSONEncoder().encode(dict)
+                } else if JSONSerialization.isValidJSONObject(dict) {
+                    data = try? JSONSerialization.data(withJSONObject: dict, options: .fragmentsAllowed)
+                }
+                guard let data else { self.init(); return }
                 self.init(data: data)
                 hsOrigDict = dict
             }
