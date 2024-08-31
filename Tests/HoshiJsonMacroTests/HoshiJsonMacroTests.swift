@@ -20,8 +20,7 @@ final class HoshiJsonMacroTests: XCTestCase {
             """
             @HoshiJson
             class Test {
-                @HSNoEqual @HSJson("int_a") var traceID: String = ""
-                var test2: Int?
+                var x: Double = 0
             }
             """,
             expandedSource: """

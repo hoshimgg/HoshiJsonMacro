@@ -1,12 +1,14 @@
 import Foundation
 import HoshiJsonMacro
 
-@HoshiJson struct GridLinkMemberExtra {
-    var price: Int = 0
-    var priceText: String = ""
+@HoshiJson class StructA {
+    var a: Int = 0
+    var b: Bool = false
+    var c: String = ""
+    var d: Double = 0
 }
 
-let dict: [String:Any] = ["price": HSJsonObj(100), "price_text": HSJsonObj("100元")]
-let dict2: [String:Any] = ["price": 100, "price_text": "100元"]
-let extra = GridLinkMemberExtra(dict: dict2)
-print(extra)
+let a = StructA(jsonStr: """
+    {"a": true, "b": 1, "c": "c", "d": true}
+""")
+print(a)

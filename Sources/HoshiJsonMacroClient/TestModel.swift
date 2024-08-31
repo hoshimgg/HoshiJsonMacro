@@ -16,7 +16,7 @@ public class MDEntity {
 
 @HoshiJson
 struct StructTestA {
-    @HSNoEqual var intA = 0
+    @HSNoEqual var intA: Int = 0
     var int_b = 1
     var intID: Int? = 4
 //    var bizExtraData: [String:Codable] = [:]
@@ -46,5 +46,5 @@ class ClassTestA {
 
 @HoshiJson
 class ClassTestC: MDEntity {
-    var intA = 4
+    var intA: Int = 4
 }

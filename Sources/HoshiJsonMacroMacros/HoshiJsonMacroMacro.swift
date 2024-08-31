@@ -19,6 +19,8 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         let name: String
         let noEqual: Bool
         let json: String
+        let isBool: Bool
+        let isInt: Bool
     }
     
     public static func expansion<Declaration, Context> (
@@ -34,14 +36,16 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         
         let name = declaration.as(ClassDeclSyntax.self)?.name.text ?? declaration.as(StructDeclSyntax.self)?.name.text ?? ""
         
-        let variables: [HSVariable] = declaration.memberBlock.members.compactMap { member in
-            guard let varDeclSyn = member.decl.as(VariableDeclSyntax.self) else { return nil }
-            if varDeclSyn.bindings.first?.accessorBlock != nil { return nil }  // 计算属性
+        var variables: [HSVariable] = []
+        for member in declaration.memberBlock.members {  // 不用compactMap的原因是会导致“错误提示”显示错误
+            guard let varDeclSyn = member.decl.as(VariableDeclSyntax.self) else { continue }
+            guard let binding = varDeclSyn.bindings.first else { continue }
+            if binding.accessorBlock != nil { continue }  // 计算属性
             let noJson = varDeclSyn.attributes.contains {
                 $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "HSNoJson"
             }
-            if noJson { return nil }
-            guard let name = varDeclSyn.bindings.first?.pattern.as(IdentifierPatternSyntax.self)?.identifier.text else { return nil }
+            if noJson { continue }
+            guard let name = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text else { continue }
             let noEqual = varDeclSyn.attributes.contains {
                 $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "HSNoEqual"
             }
@@ -51,7 +55,7 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
                 .as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text
             ?? name.toSnake
 
-            return HSVariable(name: name, noEqual: noEqual, json: json)
+            variables.append(HSVariable(name: name, noEqual: noEqual, json: json, isBool: isBool(binding: binding), isInt: isInt(binding: binding)))
         }
         
         let enums = declaration.memberBlock.members.compactMap { member in
@@ -66,9 +70,29 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         let hasCodingKeys = enums.contains("CodingKeys")
         let hasInitFromDcd = inits.contains { $0.firstName.text == "from" && $0.secondName?.text == "decoder" }
         
-        let assignments = variables.map { """
-            self.\($0.name) = try container.decodeIfPresent(type(of: \($0.name)), forKey: .\($0.name)) ?? \($0.name)
-        """ }
+        let assignments = variables.map {
+            if $0.isBool {
+                return """
+                    if let v = try? container?.decodeIfPresent(Bool.self, forKey: .\($0.name)) {
+                        self.\($0.name) = v
+                    } else if let v = try? container?.decodeIfPresent(Int.self, forKey: .\($0.name)) {
+                        self.\($0.name) = v > 0
+                    }
+                """
+            } else if $0.isInt {
+                return """
+                    if let v = try? container?.decodeIfPresent(Int.self, forKey: .\($0.name)) {
+                        self.\($0.name) = v
+                    } else if let v = try? container?.decodeIfPresent(Bool.self, forKey: .\($0.name)) {
+                        self.\($0.name) = v ? 1 : 0
+                    }
+                """
+            } else {
+                return """
+                    self.\($0.name) = (try? container?.decodeIfPresent(type(of: \($0.name)), forKey: .\($0.name))) ?? \($0.name)
+                """
+            }
+        }
         
         let requiredStr = isClass ? "required " : ""
         let cvnsStr = isClass ? "convenience " : ""
@@ -101,8 +125,8 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         """ : ""
         
         let initFromDcdStr = hasInitFromDcd ? "" : """
-            public \(requiredStr)init(from decoder: Decoder) throws {
-                let container = try decoder.container(keyedBy: CodingKeys.self)
+            public \(requiredStr)init(from decoder: Decoder) {
+                let container = try? decoder.container(keyedBy: CodingKeys.self)
                 \(assignments.joined(separator: "\n    "))
                 \(superInitStr)
             }
@@ -214,6 +238,24 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         if isClass && fatherName == nil { exs.append(descExtension) }
         if fatherName == nil { exs.append(equalExtension) }
         return exs
+    }
+    
+    static func isBool(binding: PatternBindingSyntax) -> Bool {
+        // 显式类型声明
+        let typeSyntax = binding.typeAnnotation?.type
+        let identifier = typeSyntax?.as(IdentifierTypeSyntax.self) ?? typeSyntax?.as(OptionalTypeSyntax.self)?.wrappedType.as(IdentifierTypeSyntax.self)
+        if let typeText = identifier?.name.text { return typeText == "Bool" }
+        // 隐式类型推导
+        return binding.initializer?.value.as(BooleanLiteralExprSyntax.self) != nil
+    }
+    
+    static func isInt(binding: PatternBindingSyntax) -> Bool {
+        // 显式类型声明
+        let typeSyntax = binding.typeAnnotation?.type
+        let identifier = typeSyntax?.as(IdentifierTypeSyntax.self) ?? typeSyntax?.as(OptionalTypeSyntax.self)?.wrappedType.as(IdentifierTypeSyntax.self)
+        if let typeText = identifier?.name.text { return typeText == "Int" }
+        // 隐式类型推导
+        return binding.initializer?.value.as(IntegerLiteralExprSyntax.self) != nil
     }
 }
 
