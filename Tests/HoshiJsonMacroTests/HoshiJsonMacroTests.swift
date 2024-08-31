@@ -20,7 +20,7 @@ final class HoshiJsonMacroTests: XCTestCase {
             """
             @HoshiJson
             class Test {
-                var x: Double = 0
+               
             }
             """,
             expandedSource: """

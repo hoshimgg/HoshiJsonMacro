@@ -23,6 +23,7 @@ public protocol HoshiDecodable: Decodable {
     named(init(coder:)),
     named(init()),
     named(CodingKeys),
+    named(encode(to:)),
     named(==),
     named(isEqual),
     named(description),

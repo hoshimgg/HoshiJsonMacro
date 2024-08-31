@@ -106,15 +106,18 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             }.joined(separator: "\n        ")
         }()
         
-        let codingKeysCode = variables.map { """
+        var codingKeysCode = variables.map { """
             case \($0.name) = "\($0.json)"
         """ }.joined(separator: "\n")
+        if codingKeysCode.isEmpty { codingKeysCode = "case hoshi = \"hoshi\"" }
         
         let codingKeysStr = hasCodingKeys ? "" : """
             enum CodingKeys: String, CodingKey {
                 \(codingKeysCode)
             }
         """
+        
+        let encodeFuncStr = variables.isEmpty ? "func encode(to encoder: any Encoder) throws {}" : ""
         
         let descCode = variables.map {"\($0.name): \\(\($0.name))"}.joined(separator: ", ")
         
@@ -136,6 +139,7 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             if v.noEqual { return nil }
             return "lhs.\(v.name) == rhs.\(v.name)"
         }.joined(separator: " && ")
+        if equalStr.isEmpty { equalStr = "true" }
         
         equalStr = hasFather ? "" : """
             public static func == (lhs: \(name), rhs: \(name)) -> Bool {
@@ -160,6 +164,7 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
             var hsOrigJsonStr: String?
         
             \(raw: codingKeysStr)
+            \(raw: encodeFuncStr)
             
             \(raw: initFromDcdStr)
             
