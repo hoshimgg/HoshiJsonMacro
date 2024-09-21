@@ -13,23 +13,7 @@ public protocol HoshiDecodable: Decodable {
 /// (2) 使用 `@HSJson("name")` 自定义json字段名
 /// - Warning: 除MDEntity或NSObject外，禁止继承
 /// - Note: 若解析失败，请首先考虑类型声明错误
-@attached(member, names:
-    named(hsOrigDict),
-    named(hsOrigJsonStr),
-    named(init(from:)),
-    named(init(jsonStr:)),
-    named(init(dict:)),
-    named(init(data:)),
-    named(init(coder:)),
-    named(init()),
-    named(CodingKeys),
-    named(encode(to:)),
-    named(==),
-    named(isEqual),
-    named(description),
-    named(jsonString),
-    named(toDict)
-)
+@attached(member, names: arbitrary)
 @attached(extension, conformances: HoshiDecodable, CustomStringConvertible, Equatable, Encodable)
 public macro HoshiJson() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HoshiJsonMacro")
 
@@ -45,3 +29,8 @@ public macro HSJson(_: String) = #externalMacro(module: "HoshiJsonMacroMacros", 
 /// 标记某变量不参与序列化/反序列化
 @attached(peer)
 public macro HSNoJson() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HSNoJsonMacro")
+
+/// 自动生成public的init方法，可识别默认值
+/// - Warning: 目前必须显示声明每个变量的类型（后续会优化）
+@attached(member, names: arbitrary)
+public macro HoshiInit() = #externalMacro(module: "HoshiJsonMacroMacros", type: "HoshiInitMacro")

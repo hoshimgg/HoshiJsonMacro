@@ -20,6 +20,7 @@ struct StructTestA {
     var int_b = 1
     var intID: Int? = 4
 //    var bizExtraData: [String:Codable] = [:]
+    var width: Double = 0
 }
 
 @HoshiJson

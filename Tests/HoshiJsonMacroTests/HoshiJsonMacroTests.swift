@@ -10,6 +10,7 @@ let testMacros: [String: Macro.Type] = [
     "HoshiJson": HoshiJsonMacro.self,
     "HSNoEqual": HSNoEqualMacro.self,
     "HSJson": HSJsonMacro.self,
+    "HoshiInit": HoshiInitMacro.self,
 ]
 #endif
 
@@ -18,9 +19,17 @@ final class HoshiJsonMacroTests: XCTestCase {
         #if canImport(HoshiJsonMacroMacros)
         assertMacroExpansion(
             """
-            @HoshiJson
-            class Test {
-               
+            struct S1 {
+                let a
+            }
+            
+            enum E1 {
+                case a
+            }
+            
+            @HoshiInit
+            struct Test {
+                let a: E1 = .a  // test
             }
             """,
             expandedSource: """
