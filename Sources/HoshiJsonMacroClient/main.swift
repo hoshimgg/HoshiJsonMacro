@@ -1,28 +1,18 @@
 import Foundation
 import HoshiJsonMacro
 
-@HoshiInit
-@objcMembers public class BLMultiChatCellInfo: NSObject {
-    public let position: Int
-    public let style: CellStyle
-    public var name: String = ""
-    public var avatarUrl: String = ""
-    public var giftText: String = ""
-    public var isAdmin: Bool = false
-    public var isMute: Bool = false
-    public var uid: Int = 0
-    public var isMystery: Bool = false
-    public var muteFromUID: String = ""
-    public var oppositeAnchorUID: Int = 0  // test
+@HoshiJson class Test1 {
+    var testDict: HSJsonObj = nil
 }
 
-@objc(BLMultiChatCellStyle) public enum CellStyle: Int {
-    case empty  // 空麦位
-    case seating  // 入座中
-    case seated  // 有人
+let test1 = Test1(jsonStr: """
+{
+    "test_dict1": {
+        "key1": "value1",
+        "key2": "value2"
+    }
 }
+""")
 
-let info = BLMultiChatCellInfo(position: 2, style: .seating, name: "haha")
-print(info.name)
-
-print("= .a  // test".components(separatedBy: "//").first ?? "")
+let temp1 = test1.testDict.toDict
+print(temp1)

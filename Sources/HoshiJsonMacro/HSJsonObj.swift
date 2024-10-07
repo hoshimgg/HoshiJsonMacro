@@ -19,6 +19,16 @@ public struct HSJsonObj {
             self.value = value
         }
     }
+    
+    public var toDict: [String:Any] {
+        guard let data = try? JSONEncoder().encode(self) else { return ["error": "序列化错误"] }
+        return (try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]) ?? ["error": "序列化错误"]
+    }
+    
+    public var jsonString: String {
+        guard let data = try? JSONEncoder().encode(self) else { return "序列化错误" }
+        return String(data: data, encoding: .utf8) ?? "序列化错误"
+    }
 }
 
 extension HSJsonObj: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral, ExpressibleByStringLiteral, ExpressibleByBooleanLiteral {
