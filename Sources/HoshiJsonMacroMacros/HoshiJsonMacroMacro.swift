@@ -184,6 +184,10 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
                 guard let data = try? JSONEncoder().encode(self) else { return ["error": "序列化错误"] }
                 return (try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]) ?? ["error": "序列化错误"]
             }
+        
+            public func hsCopy() -> \(raw: name) {
+                return \(raw: name)(dict: self.toDict)
+            }
         """ ]
     }
     

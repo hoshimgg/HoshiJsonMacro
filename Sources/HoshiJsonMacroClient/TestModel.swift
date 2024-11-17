@@ -8,19 +8,16 @@
 import Foundation
 import HoshiJsonMacro
 
-public class MDEntity {
-    public var description: String {
-        return "MDEntity"
-    }
-}
+public class MDEntity: NSObject { }
 
 @HoshiJson
 struct StructTestA {
     @HSNoEqual var intA: Int = 0
     var int_b = 1
-    var intID: Int? = 4
-//    var bizExtraData: [String:Codable] = [:]
-    var width: Double = 0
+    var intID: Int? = 2
+    var bizExtraData: [String:HSJsonObj] = ["3":3]
+    var width: Double = 4
+    var jsonObj: HSJsonObj = 5
 }
 
 @HoshiJson
