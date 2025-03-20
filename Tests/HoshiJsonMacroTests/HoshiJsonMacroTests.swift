@@ -19,17 +19,11 @@ final class HoshiJsonMacroTests: XCTestCase {
         #if canImport(HoshiJsonMacroMacros)
         assertMacroExpansion(
             """
-            struct S1 {
-                let a
-            }
-            
-            enum E1 {
-                case a
-            }
-            
-            @HoshiInit
-            struct Test {
-                let a: E1 = .a  // test
+            @HoshiJson class TestClassA {
+                @HSJson("custom_a") var testA = 1
+                var testB: String? = nil
+                var testC = [1, 3, 5]
+                var testD: Bool? = true
             }
             """,
             expandedSource: """
