@@ -54,10 +54,20 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
                 """
             } else if $0.isInt {
                 return """
-                    if let v = try? container?.decodeIfPresent(Int.self, forKey: .\($0.name)) {
+                    if let v = try? container?.decodeIfPresent(\($0.typeName ?? "Int").self, forKey: .\($0.name)) {
                         self.\($0.name) = v
                     } else if let v = try? container?.decodeIfPresent(Bool.self, forKey: .\($0.name)) {
                         self.\($0.name) = v ? 1 : 0
+                    } else if let v = try? container?.decodeIfPresent(String.self, forKey: .\($0.name)) {
+                        self.\($0.name) = \($0.typeName ?? "Int")(v) ?? 0
+                    }
+                """
+            } else if $0.isString {
+                return """
+                    if let v = try? container?.decodeIfPresent(String.self, forKey: .\($0.name)) {
+                        self.\($0.name) = v
+                    } else if let v = try? container?.decodeIfPresent(Int.self, forKey: .\($0.name)) {
+                        self.\($0.name) = String(v)
                     }
                 """
             } else {
@@ -279,6 +289,7 @@ struct HSVariable {
     let jsonName: String
     let isBool: Bool
     let isInt: Bool
+    let isString: Bool
 }
 
 func analyzeVar(declaration: DeclGroupSyntax) -> [HSVariable] {
@@ -306,13 +317,17 @@ func analyzeVar(declaration: DeclGroupSyntax) -> [HSVariable] {
             .as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text
         ?? name.toSnake
         
-        let isInt = typeName == nil ? binding.initializer?.value.as(IntegerLiteralExprSyntax.self) != nil : typeName == "Int"
+        let intTypeNames = ["Int", "Int8", "Int16", "Int32", "Int64", "UInt", "UInt8", "UInt16", "UInt32", "UInt64"]
+        let isInt = typeName == nil ? binding.initializer?.value.as(IntegerLiteralExprSyntax.self) != nil : intTypeNames.contains(typeName ?? "")
         
         let isBool = typeName == nil ? binding.initializer?.value.as(BooleanLiteralExprSyntax.self) != nil : typeName == "Bool"
         
+        let isString = typeName == nil ? binding.initializer?.value.as(StringLiteralExprSyntax.self) != nil : typeName == "String"
+        
         let initial = String(binding.initializer?.description.components(separatedBy: "//").first ?? "")
         
-        variables.append(HSVariable(name: name, typeName: typeName, isOptional: isOptional, initial: initial, noJson: noJson, noEqual: noEqual, jsonName: jsonName, isBool: isBool, isInt: isInt))
+        variables.append(HSVariable(name: name, typeName: typeName, isOptional: isOptional, initial: initial, noJson: noJson, noEqual: noEqual,
+                                    jsonName: jsonName, isBool: isBool, isInt: isInt, isString: isString))
     }
     return variables
 }
