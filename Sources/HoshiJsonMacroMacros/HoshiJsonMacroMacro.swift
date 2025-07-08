@@ -29,7 +29,7 @@ public struct HoshiJsonMacro: MemberMacro, ExtensionMacro {
         
         let name = declaration.as(ClassDeclSyntax.self)?.name.text ?? declaration.as(StructDeclSyntax.self)?.name.text ?? ""
         
-        let variables = analyzeVar(declaration: declaration).filter { !$0.noJson }
+        let variables = analyzeVar(declaration: declaration).filter { !$0.noJson && !$0.isLet }
         
         let enums = declaration.memberBlock.members.compactMap { member in
             member.decl.as(EnumDeclSyntax.self)?.name.text
@@ -290,6 +290,7 @@ struct HSVariable {
     let isBool: Bool
     let isInt: Bool
     let isString: Bool
+    let isLet: Bool
 }
 
 func analyzeVar(declaration: DeclGroupSyntax) -> [HSVariable] {
@@ -313,21 +314,19 @@ func analyzeVar(declaration: DeclGroupSyntax) -> [HSVariable] {
         
         let jsonName = varDeclSyn.attributes.first {
             $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "HSJson"
-        }?.as(AttributeSyntax.self)?.arguments?.as(LabeledExprListSyntax.self)?.first?.as(LabeledExprSyntax.self)?.expression
+        }?.as(AttributeSyntax.self)?.arguments?.as(LabeledExprListSyntax.self)?.first?.expression
             .as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text
         ?? name.toSnake
         
         let intTypeNames = ["Int", "Int8", "Int16", "Int32", "Int64", "UInt", "UInt8", "UInt16", "UInt32", "UInt64"]
         let isInt = typeName == nil ? binding.initializer?.value.as(IntegerLiteralExprSyntax.self) != nil : intTypeNames.contains(typeName ?? "")
-        
         let isBool = typeName == nil ? binding.initializer?.value.as(BooleanLiteralExprSyntax.self) != nil : typeName == "Bool"
-        
         let isString = typeName == nil ? binding.initializer?.value.as(StringLiteralExprSyntax.self) != nil : typeName == "String"
-        
         let initial = String(binding.initializer?.description.components(separatedBy: "//").first ?? "")
+        let isLet = varDeclSyn.bindingSpecifier.text == "let"
         
         variables.append(HSVariable(name: name, typeName: typeName, isOptional: isOptional, initial: initial, noJson: noJson, noEqual: noEqual,
-                                    jsonName: jsonName, isBool: isBool, isInt: isInt, isString: isString))
+                                    jsonName: jsonName, isBool: isBool, isInt: isInt, isString: isString, isLet: isLet))
     }
     return variables
 }
